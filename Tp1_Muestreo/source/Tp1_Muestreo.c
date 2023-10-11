@@ -107,11 +107,14 @@ void BufferWrite(q15_t value){
 	}
 
 }
-setNextMode(){
-	sampleMode ++;
-	if(sampleMode == SM_LAST){
-		sampleMode = 0;
+setNextMode(uint8_t mode){
+	if(mode){
+		sampleMode = BY_PASS
 	}
+	if(!mode){
+		sampleMode = BUFFER;
+	}
+
 
 	if(sampleMode== BY_PASS){
 		setLedColor(currentFrequency);
@@ -121,10 +124,7 @@ setNextMode(){
 }
 
 void setNextFrec(uint8_t f_indx){
-    currentFrequency++;
-    if(currentFrequency >= CAN_FREC){
-        currentFrequency=0;
-    }
+
 
     setLedColor(f_indx);
 
@@ -272,14 +272,17 @@ void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
   if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & intStatus)
   {
 	  data = UART_ReadByte(DEMO_UART);
-	  data_h = (data>>6) && 3;
-	  data_l = (data) && 63;
-      switch(data_h){
-      	  case 0b00: setNextFrec(data_l);
-      	  case 0b01: setNextMode();
-      	  //case 0b10: setFilter();
+	  data_filter = (data>>3) & 5;
+	  data_freq = (data) & 5;
+	  data_mode = (data>>6) & 1
 
-      }
+
+
+	 setNextFrec(data_freq);
+     setNextMode(data_mode);
+     //setFilter(data_filter);
+
+
   }
 
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
