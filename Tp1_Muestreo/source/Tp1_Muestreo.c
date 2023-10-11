@@ -120,17 +120,17 @@ setNextMode(){
 	}
 }
 
-void setNextFrec(){
+void setNextFrec(uint8_t f_indx){
     currentFrequency++;
     if(currentFrequency >= CAN_FREC){
         currentFrequency=0;
     }
 
-    setLedColor(currentFrequency);
+    setLedColor(f_indx);
 
     //TODO ACA NACHO DEBERIA CAMBIAR LA FRECUENCIA DEL ADC
     //Usando el array at current frec
-    PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, frequencyBuff[currentFrequency]);
+    PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, frequencyBuff[f_indx]);
 }
 
 void ConfigLeds(){
@@ -249,6 +249,46 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
     __DSB();
   #endif
 }
+
+
+/* UART0_RX_TX_IRQn interrupt handler */
+void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
+  uint32_t intStatus;
+  uint8_t data;
+  /* Reading all interrupt flags of status registers */
+  intStatus = UART_GetStatusFlags(UART0_PERIPHERAL);
+
+  /* Flags can be cleared by reading the status register and reading/writing data registers.
+    See the reference manual for details of each flag.
+    The UART_ClearStatusFlags() function can be also used for clearing of flags in case the content of data regsiter is not used.
+    For example:
+        status_t status;
+        intStatus &= ~(kUART_RxOverrunFlag | kUART_NoiseErrorFlag | kUART_FramingErrorFlag | kUART_ParityErrorFlag);
+        status = UART_ClearStatusFlags(UART0_PERIPHERAL, intStatus);
+  */
+
+  /* Place your code here */
+  /* If new data arrived. */
+  if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & intStatus)
+  {
+	  data = UART_ReadByte(DEMO_UART);
+	  data_h = (data>>6) && 3;
+	  data_l = (data) && 63;
+      switch(data_h){
+      	  case 0b00: setNextFrec(data_l);
+      	  case 0b01: setNextMode();
+      	  //case 0b10: setFilter();
+
+      }
+  }
+
+  /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
+     Store immediate overlapping exception return operation might vector to incorrect interrupt. */
+  #if defined __CORTEX_M && (__CORTEX_M == 4U)
+    __DSB();
+  #endif
+}
+
 
 
 

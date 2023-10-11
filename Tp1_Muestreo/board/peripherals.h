@@ -13,6 +13,8 @@
 #include "fsl_pit.h"
 #include "fsl_dac.h"
 #include "fsl_adc16.h"
+#include "fsl_uart.h"
+#include "fsl_clock.h"
 
 #if defined(__cplusplus)
 extern "C" {
@@ -53,6 +55,18 @@ extern "C" {
 #define ADC1_IRQHANDLER 
 /* Channel 0 (SE.18) conversion control group. */
 #define ADC1_CH0_CONTROL_GROUP 0
+/* Definition of peripheral ID */
+#define UART0_PERIPHERAL UART0
+/* Definition of the clock source frequency */
+#define UART0_CLOCK_SOURCE CLOCK_GetFreq(UART0_CLK_SRC)
+/* UART0 interrupt vector ID (number). */
+#define UART0_SERIAL_RX_TX_IRQN UART0_RX_TX_IRQn
+/* UART0 interrupt handler identifier. */
+#define UART0_SERIAL_RX_TX_IRQHANDLER UART0_RX_TX_IRQHandler
+/* UART0 interrupt vector ID (number). */
+#define UART0_SERIAL_ERROR_IRQN UART0_ERR_IRQn
+/* UART0 interrupt handler identifier. */
+#define UART0_SERIAL_ERROR_IRQHANDLER UART0_ERR_IRQHandler
 
 /***********************************************************************************************************************
  * Global variables
@@ -62,6 +76,7 @@ extern const dac_config_t DAC0_config;
 extern adc16_channel_config_t ADC1_channelsConfig[1];
 extern const adc16_config_t ADC1_config;
 extern const adc16_channel_mux_mode_t ADC1_muxMode;
+extern const uart_config_t UART0_config;
 
 /***********************************************************************************************************************
  * Initialization functions
