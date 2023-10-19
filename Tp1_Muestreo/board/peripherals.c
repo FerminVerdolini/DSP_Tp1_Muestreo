@@ -285,7 +285,7 @@ instance:
       - enableRx: 'true'
     - quick_selection: 'QuickSelection1'
   - interruptsCfg:
-    - interrupts: 'kUART_TxDataRegEmptyInterruptEnable kUART_TransmissionCompleteInterruptEnable kUART_RxDataRegFullInterruptEnable kUART_RxOverrunInterruptEnable'
+    - interrupts: 'kUART_TransmissionCompleteInterruptEnable kUART_RxDataRegFullInterruptEnable kUART_RxOverrunInterruptEnable'
     - interrupt_vectors:
       - enable_rx_tx_irq: 'true'
       - interrupt_rx_tx:
@@ -301,7 +301,6 @@ instance:
         - enable_priority: 'false'
         - priority: '0'
         - enable_custom_name: 'false'
-    - quick_selection: 'QuickSelection1'
  * BE CAREFUL MODIFYING THIS COMMENT - IT IS YAML SETTINGS FOR TOOLS **********/
 /* clang-format on */
 const uart_config_t UART0_config = {
@@ -317,7 +316,7 @@ const uart_config_t UART0_config = {
 
 static void UART0_init(void) {
   UART_Init(UART0_PERIPHERAL, &UART0_config, UART0_CLOCK_SOURCE);
-  UART_EnableInterrupts(UART0_PERIPHERAL, kUART_TxDataRegEmptyInterruptEnable | kUART_TransmissionCompleteInterruptEnable | kUART_RxDataRegFullInterruptEnable | kUART_RxOverrunInterruptEnable);
+  UART_EnableInterrupts(UART0_PERIPHERAL, kUART_TransmissionCompleteInterruptEnable | kUART_RxDataRegFullInterruptEnable | kUART_RxOverrunInterruptEnable);
   /* Enable interrupt UART0_RX_TX_IRQn request in the NVIC. */
   EnableIRQ(UART0_SERIAL_RX_TX_IRQN);
 }

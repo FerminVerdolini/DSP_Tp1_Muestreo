@@ -19,6 +19,8 @@ source/Tp1_Muestreo.o source/Tp1_Muestreo.d: ../source/Tp1_Muestreo.c \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_pit.h \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_dac.h \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_adc16.h \
+ /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_uart.h \
+ /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_clock.h \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/board/pin_mux.h \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/board/clock_config.h \
  /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/device/MK64F12.h \
@@ -48,6 +50,8 @@ source/Tp1_Muestreo.o source/Tp1_Muestreo.d: ../source/Tp1_Muestreo.c \
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_pit.h:
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_dac.h:
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_adc16.h:
+/home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_uart.h:
+/home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/drivers/fsl_clock.h:
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/board/pin_mux.h:
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/board/clock_config.h:
 /home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/device/MK64F12.h:

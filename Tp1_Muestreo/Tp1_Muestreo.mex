@@ -1101,10 +1101,9 @@
                            <setting name="enableRx" value="true"/>
                         </struct>
                      </config_set>
-                     <config_set name="interruptsCfg" quick_selection="QuickSelection1">
+                     <config_set name="interruptsCfg">
                         <set name="interrupts">
                            <selected>
-                              <id>kUART_TxDataRegEmptyInterruptEnable</id>
                               <id>kUART_TransmissionCompleteInterruptEnable</id>
                               <id>kUART_RxDataRegFullInterruptEnable</id>
                               <id>kUART_RxOverrunInterruptEnable</id>

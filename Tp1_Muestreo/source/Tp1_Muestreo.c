@@ -47,13 +47,15 @@
 uint16_t frequencyBuff[CAN_FREC];
 uint8_t currentFrequency;
 uint8_t sampleMode;
+int filterMode[FQ_LAST][FL_LAST];
 q15_t circular_buffer[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
 volatile uint16_t wbuff_index = 0;
 
+
 enum SampleModes{
-    BY_PASS,
-    BUFFER,
+	BY_PASS,
+	BUFFER,
 
     SM_LAST
 };
@@ -68,6 +70,26 @@ enum Colors{
     WHITE,
 
     C_LAST
+};
+
+enum Frequency{
+	FQ_8KS,
+	FQ_16KS,
+	FQ_22KS,
+	FQ_44KS,
+	FQ_48KS,
+
+	FQ_LAST
+};
+
+enum Filters{
+	FL_NO_FILTER,
+	FL_LOW_PASS,
+	FL_HIGH_PASS,
+	FL_BAND_PASS,
+	FL_BAND_DELETE,
+
+	FL_LAST
 };
 
 void setLedColor(int color);
@@ -108,12 +130,7 @@ void BufferWrite(q15_t value){
 
 }
 setNextMode(uint8_t mode){
-	if(mode){
-		sampleMode = BY_PASS
-	}
-	if(!mode){
-		sampleMode = BUFFER;
-	}
+	sampleMode = mode;
 
 
 	if(sampleMode== BY_PASS){
@@ -127,6 +144,7 @@ void setNextFrec(uint8_t f_indx){
 
 
     setLedColor(f_indx);
+    currentFrequency = f_indx;
 
     //TODO ACA NACHO DEBERIA CAMBIAR LA FRECUENCIA DEL ADC
     //Usando el array at current frec
@@ -255,9 +273,11 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
 void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
   uint32_t intStatus;
   uint8_t data;
+  uint8_t data_filter;
+  uint8_t data_freq;
+  uint8_t data_mode;
   /* Reading all interrupt flags of status registers */
   intStatus = UART_GetStatusFlags(UART0_PERIPHERAL);
-
   /* Flags can be cleared by reading the status register and reading/writing data registers.
     See the reference manual for details of each flag.
     The UART_ClearStatusFlags() function can be also used for clearing of flags in case the content of data regsiter is not used.
@@ -271,10 +291,10 @@ void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
   /* If new data arrived. */
   if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & intStatus)
   {
-	  data = UART_ReadByte(DEMO_UART);
-	  data_filter = (data>>3) & 5;
-	  data_freq = (data) & 5;
-	  data_mode = (data>>6) & 1
+	  data = UART_ReadByte(UART0);
+	  data_filter = (data>>3) & 7;
+	  data_freq = (data) & 7;
+	  data_mode = (data>>6) & 1;
 
 
 
@@ -284,7 +304,6 @@ void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
 
 
   }
-
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
   #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -311,7 +330,7 @@ int main(void) {
 #endif
     ConfigLeds();
     ConfigSW();
-    ConfigDAC();
+   // ConfigDAC();
 
     initBuffers();
 
@@ -340,7 +359,7 @@ int main(void) {
 void BOARD_SW2_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW2_GPIO, BOARD_SW2_GPIO_PIN_MASK);
     if(sampleMode == BY_PASS){
-    	setNextFrec();
+    	//setNextFrec();
     }
 
 }
@@ -351,7 +370,7 @@ void BOARD_SW2_IRQ_HANDLER(){
  * */
 void BOARD_SW3_IRQ_HANDLER(){
     GPIO_PortClearInterruptFlags(BOARD_SW3_GPIO, BOARD_SW3_GPIO_PIN_MASK);
-	setNextMode();
+	//setNextMode();
 
 }
 
