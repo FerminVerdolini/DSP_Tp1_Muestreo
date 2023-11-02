@@ -43,11 +43,37 @@
 /* TODO: insert other include files here. */
 #define CAN_FREC 5
 #define CAN_SAMPLES 512
-#define NTAPS8LP 48
+
+#define NTAPS8LP 102
+#define NTAPS8BP 102
+#define NTAPS8HP 102
+#define NTAPS8BSF 102
+
+#define NTAPS16LP 102
+#define NTAPS16BP 102
+#define NTAPS16HP 102
+#define NTAPS16BSF 102
+
+#define NTAPS22LP 102
+#define NTAPS22BP 102
+#define NTAPS22HP 102
+#define NTAPS22BSF 102
+
+#define NTAPS44LP 102
+#define NTAPS44BP 102
+#define NTAPS44HP 102
+#define NTAPS44BSF 102
+
+#define NTAPS48LP 102
+#define NTAPS48BP 102
+#define NTAPS48HP 102
+#define NTAPS48BSF 102
+
 
 uint16_t frequencyBuff[CAN_FREC];
 uint8_t currentFrequency;
 uint8_t sampleMode;
+uint8_t currentFilter;
 q15_t circular_buffer[CAN_SAMPLES];
 q15_t circular_buffer_filtered[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
@@ -65,37 +91,73 @@ const q15_t coeffs8LP[48] = {
 	      -89,   1028, 0
 	};
 
+const q15_t coeffs8HP[48];
+const q15_t coeffs8BP[48];
+const q15_t coeffs8BSF[48];
+
+const q15_t coeffs16LP[48];
+const q15_t coeffs16HP[48];
+const q15_t coeffs16BP[48];
+const q15_t coeffs16BSF[48];
+
+const q15_t coeffs22LP[48];
+const q15_t coeffs22HP[48];
+const q15_t coeffs22BP[48];
+const q15_t coeffs22BSF[48];
+
+const q15_t coeffs44LP[48];
+const q15_t coeffs44HP[48];
+const q15_t coeffs44BP[48];
+const q15_t coeffs44BSF[48];
+
+
+const int16_t coeffs48LP[102] = {
+      -17,    -15,    -11,     -3,      7,     17,     25,     30,     28,
+       18,      0,    -23,    -45,    -63,    -68,    -57,    -28,     16,
+       66,    111,    138,    136,     99,     29,    -63,   -159,   -235,
+     -268,   -240,   -148,      0,    177,    345,    462,    488,    399,
+      192,   -107,   -447,   -756,   -952,   -959,   -723,   -223,    520,
+     1443,   2445,   3408,   4206,   4733,   4917,   4733,   4206,   3408,
+     2445,   1443,    520,   -223,   -723,   -959,   -952,   -756,   -447,
+     -107,    192,    399,    488,    462,    345,    177,      0,   -148,
+     -240,   -268,   -235,   -159,    -63,     29,     99,    136,    138,
+      111,     66,     16,    -28,    -57,    -68,    -63,    -45,    -23,
+        0,     18,     28,     30,     25,     17,      7,     -3,    -11,
+      -15,    -17, 0
+};
+const q15_t coeffs48HP[48];
+const q15_t coeffs48BP[48];
+const q15_t coeffs48BSF[48];
+
 
 arm_status init_status;
 
-int filters_matrix[5][4];
 
-arm_fir_instance_q15 filter8LP;
-q15_t state8LP[512+NTAPS8LP];
 
-arm_fir_instance_q15 filter8BP;
-arm_fir_instance_q15 filter8HP;
-arm_fir_instance_q15 filter8BSF;
+q15_t state8LP[NTAPS8LP];
+q15_t state8BP[NTAPS8BP];
+q15_t state8HP[NTAPS8HP];
+q15_t state8BSF[NTAPS8BSF];
 
-arm_fir_instance_q15 filter16LP;
-arm_fir_instance_q15 filter16BP;
-arm_fir_instance_q15 filter16HP;
-arm_fir_instance_q15 filter16BSF;
+q15_t state16LP[NTAPS16LP];
+q15_t state16BP[NTAPS16BP];
+q15_t state16HP[NTAPS16HP];
+q15_t state16BSF[NTAPS16BSF];
 
-arm_fir_instance_q15 filter22LP;
-arm_fir_instance_q15 filter22BP;
-arm_fir_instance_q15 filter22HP;
-arm_fir_instance_q15 filter22BSF;
+q15_t state22LP[NTAPS22LP];
+q15_t state22BP[NTAPS22BP];
+q15_t state22HP[NTAPS22HP];
+q15_t state22BSF[NTAPS22BSF];
 
-arm_fir_instance_q15 filter44LP;
-arm_fir_instance_q15 filter44BP;
-arm_fir_instance_q15 filter44HP;
-arm_fir_instance_q15 filter44BSP;
+q15_t state44LP[NTAPS44LP];
+q15_t state44BP[NTAPS44BP];
+q15_t state44HP[NTAPS44HP];
+q15_t state44BSF[NTAPS44BSF];
 
-arm_fir_instance_q15 filter48LP;
-arm_fir_instance_q15 filter48BP;
-arm_fir_instance_q15 filter48HP;
-arm_fir_instance_q15 filter48BSP;
+q15_t state48LP[NTAPS48LP];
+q15_t state48BP[NTAPS48BP];
+q15_t state48HP[NTAPS48HP];
+q15_t state48BSF[NTAPS48BSF];
 
 
 
@@ -106,6 +168,28 @@ enum SampleModes{
 
     SM_LAST
 };
+
+enum Frecuency{
+	FR_8KH,
+	FR_16KH,
+	FR_22KH,
+	FR_44KH,
+	FR_48KH,
+
+	FR_LAST
+};
+
+enum Filters{
+	FI_NOFILTER,
+    FI_LOWPASS,
+	FI_HIGHTPASS,
+	FI_BANDPASS,
+	FI_DELETEBAND,
+
+	FI_LAST
+};
+
+arm_fir_instance_q15 filters_matrix[FR_LAST][FI_LAST];
 
 enum Colors{
     BLUE ,
@@ -138,7 +222,31 @@ void initBuffers(){
 
 
 void initFilter(){
-	init_status = arm_fir_init_q15(&filter8LP, NTAPS8LP, &coeffs8LP[0], &state8LP[0], 512);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_LOWPASS],     NTAPS8LP,  &coeffs8LP[0],  &state8LP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_HIGHTPASS],    NTAPS8HP, &coeffs8HP[0],  &state8HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_BANDPASS],    NTAPS8BP,  &coeffs8BP[0],  &state8BP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_DELETEBAND],  NTAPS8BSF, &coeffs8BSF[0], &state8BSF[0], 1);
+
+    init_status = arm_fir_init_q15(&filters_matrix[FR_16KH][FI_LOWPASS],    NTAPS16LP,  &coeffs16LP[0],  &state16LP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_16KH][FI_HIGHTPASS],  NTAPS16HP,  &coeffs16HP[0],  &state16HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_16KH][FI_BANDPASS],   NTAPS16BP,  &coeffs16BP[0],  &state16BP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_16KH][FI_DELETEBAND], NTAPS16BSF, &coeffs16BSF[0], &state16BSF[0], 1);
+
+    init_status = arm_fir_init_q15(&filters_matrix[FR_22KH][FI_LOWPASS],    NTAPS22LP,  &coeffs22LP[0],  &state22LP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_22KH][FI_HIGHTPASS],  NTAPS22HP,  &coeffs22HP[0],  &state22HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_22KH][FI_BANDPASS],   NTAPS22BP,  &coeffs22BP[0],  &state22BP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_22KH][FI_DELETEBAND], NTAPS22BSF, &coeffs22BSF[0], &state22BSF[0], 1);
+
+    init_status = arm_fir_init_q15(&filters_matrix[FR_44KH][FI_LOWPASS],    NTAPS44LP,  &coeffs44LP[0],  &state44LP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_44KH][FI_HIGHTPASS],  NTAPS44HP,  &coeffs44HP[0],  &state44HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_44KH][FI_BANDPASS],   NTAPS44BP,  &coeffs44BP[0],  &state44BP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_44KH][FI_DELETEBAND], NTAPS44BSF, &coeffs44BSF[0], &state44BSF[0], 1);
+
+    init_status = arm_fir_init_q15(&filters_matrix[FR_48KH][FI_LOWPASS],    NTAPS48LP,  &coeffs48LP[0],  &state48LP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_48KH][FI_HIGHTPASS],  NTAPS48HP,  &coeffs48HP[0],  &state48HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_48KH][FI_BANDPASS],   NTAPS48BP,  &coeffs48BP[0],  &state48BP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_48KH][FI_DELETEBAND], NTAPS48BSF, &coeffs48BSF[0], &state48BSF[0], 1);
+
 }
 
 q15_t BufferRead(int filter){
@@ -171,13 +279,8 @@ void BufferWrite(q15_t value){
 
 }
 void setNextMode(uint8_t mode){
-	if(mode){
-		sampleMode = BY_PASS;
-	}
-	if(!mode){
-		sampleMode = BUFFER;
-	}
 
+	sampleMode = mode;
 
 	if(sampleMode== BY_PASS){
 		setLedColor(currentFrequency);
@@ -190,10 +293,18 @@ void setNextFrec(uint8_t f_indx){
 
 
     setLedColor(f_indx);
-
+    currentFrequency = f_indx;
     //TODO ACA NACHO DEBERIA CAMBIAR LA FRECUENCIA DEL ADC
     //Usando el array at current frec
     PIT_SetTimerPeriod(PIT_PERIPHERAL, PIT_CHANNEL_0, frequencyBuff[f_indx]);
+}
+
+void setFilter(uint8_t f_indx){
+
+
+    //setLedColor(); ?????
+    currentFilter = f_indx;
+
 }
 
 void ConfigLeds(){
@@ -268,12 +379,7 @@ void setLedColor(int color){
         break;
     }
 }
-/* TODO: insert other definitions and declarations here. */
-void delay(){
-	for(int i =0 ;i<800000; i++ ){
-        __asm volatile ("nop");
-	}
-}
+
 
 
 /* Rutinas de interrupcion */
@@ -288,25 +394,31 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
   intStatus = PIT_GetStatusFlags(PIT_PERIPHERAL, PIT_CHANNEL_0);
   PIT_ClearStatusFlags(PIT_PERIPHERAL, PIT_CHANNEL_0, intStatus);
   volatile uint16_t g_Adc16ConversionValue = 0;
+  q15_t q_filterOuput = 0;
+  q15_t q_filterInput = 0;
 
   switch(sampleMode){
-    case BY_PASS:
+  case BY_PASS:
 
-    /* Place your code here */
-
+        /* Place your code here */
 
         g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
         //DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
-        BufferWrite((q15_t)(g_Adc16ConversionValue));
-        arm_fir_q15(&filter8LP, &circular_buffer[0], &circular_buffer_filtered[0], 512);
-        DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)BufferRead(1));
-
-    break;
-    case BUFFER: 
+        if(currentFilter == FI_NOFILTER){
+            BufferWrite((q15_t)(g_Adc16ConversionValue));
+            DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
+        }else{
+            q_filterInput = (q15_t)(g_Adc16ConversionValue);
+            arm_fir_q15(&filters_matrix[currentFrequency][currentFilter],&q_filterInput, &q_filterOuput, 1);
+            BufferWrite(q_filterOuput);
+            DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)q_filterOuput);
+        }
+        break;
+  case BUFFER:
         DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)BufferRead(0));
-    break;
+        break;
   }
-  
+
   /* Add for ARM errata 838869, affects Cortex-M4, Cortex-M4F
      Store immediate overlapping exception return operation might vector to incorrect interrupt. */
   #if defined __CORTEX_M && (__CORTEX_M == 4U)
@@ -339,15 +451,15 @@ void UART0_SERIAL_RX_TX_IRQHANDLER(void) {
   if ((kUART_RxDataRegFullFlag | kUART_RxOverrunFlag) & intStatus)
   {
 	  data = UART_ReadByte(UART0);
-	  data_filter = (data>>3) & 5;
-	  data_freq = (data) & 5;
+	  data_filter = (data>>3) & 7;
+	  data_freq = (data) & 7;
 	  data_mode = (data>>6) & 1;
 
 
 
 	 setNextFrec(data_freq);
      setNextMode(data_mode);
-     //setFilter(data_filter);
+     setFilter(data_filter);
 
 
   }

@@ -61,7 +61,7 @@ main-build: Tp1_Muestreo.axf
 Tp1_Muestreo.axf: $(OBJS) $(USER_OBJS) makefile objects.mk $(OPTIONAL_TOOL_DEPS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MCU Linker'
-	arm-none-eabi-gcc -nostdlib -L"C:\Users\Usuario\Documents\GitHub\DSP_Tp1_Muestreo\Tp1_Muestreo\CMSIS\DSP" -Xlinker -Map="Tp1_Muestreo.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T Tp1_Muestreo_Debug.ld -o "Tp1_Muestreo.axf" $(OBJS) $(USER_OBJS) $(LIBS)
+	arm-none-eabi-gcc -nostdlib -L"/home/ferminv/Universidad/DecSemestre/DSP/Tp1/DSP_Tp1_Muestreo/Tp1_Muestreo/CMSIS/DSP" -Xlinker -Map="Tp1_Muestreo.map" -Xlinker --gc-sections -Xlinker -print-memory-usage -Xlinker --sort-section=alignment -Xlinker --cref -mcpu=cortex-m4 -mfpu=fpv4-sp-d16 -mfloat-abi=hard -mthumb -T Tp1_Muestreo_Debug.ld -o "Tp1_Muestreo.axf" $(OBJS) $(USER_OBJS) $(LIBS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
