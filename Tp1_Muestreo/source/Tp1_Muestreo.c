@@ -75,7 +75,6 @@ uint8_t currentFrequency;
 uint8_t sampleMode;
 uint8_t currentFilter;
 q15_t circular_buffer[CAN_SAMPLES];
-q15_t circular_buffer_filtered[CAN_SAMPLES];
 volatile uint16_t rbuff_index = 0;
 volatile uint16_t f_rbuff_index = 0;
 volatile uint16_t wbuff_index = 0;
@@ -223,7 +222,7 @@ void initBuffers(){
 
 void initFilter(){
     init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_LOWPASS],     NTAPS8LP,  &coeffs8LP[0],  &state8LP[0],  1);
-    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_HIGHTPASS],    NTAPS8HP, &coeffs8HP[0],  &state8HP[0],  1);
+    init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_HIGHTPASS],   NTAPS8HP, &coeffs8HP[0],  &state8HP[0],  1);
     init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_BANDPASS],    NTAPS8BP,  &coeffs8BP[0],  &state8BP[0],  1);
     init_status = arm_fir_init_q15(&filters_matrix[FR_8KH][FI_DELETEBAND],  NTAPS8BSF, &coeffs8BSF[0], &state8BSF[0], 1);
 
@@ -249,22 +248,16 @@ void initFilter(){
 
 }
 
-q15_t BufferRead(int filter){
-	q15_t temp = 0;
-	if(!filter){
-		temp = circular_buffer[rbuff_index];
-		rbuff_index++;
-		if(rbuff_index>=CAN_SAMPLES){
-			rbuff_index = 0;
-		}
-	}
-	if(filter){
-		temp = circular_buffer_filtered[f_rbuff_index];
-		f_rbuff_index++;
-		if(f_rbuff_index>=CAN_SAMPLES){
-			f_rbuff_index = 0;
-		}
-	}
+q15_t BufferRead(){
+    q15_t temp = 0;
+
+    temp = circular_buffer[rbuff_index];
+    rbuff_index++;
+    if(rbuff_index>=CAN_SAMPLES){
+        rbuff_index = 0;
+    }
+
+
 	return temp;
 }
 
@@ -405,17 +398,22 @@ void PIT_CHANNEL_0_IRQHANDLER(void) {
         g_Adc16ConversionValue = (uint16_t)(ADC16_GetChannelConversionValue(ADC1_PERIPHERAL, 0U))>>4;
         //DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
         if(currentFilter == FI_NOFILTER){
-            BufferWrite((q15_t)(g_Adc16ConversionValue));
             DAC_SetBufferValue(DAC0_PERIPHERAL, 0, g_Adc16ConversionValue);
         }else{
             q_filterInput = (q15_t)(g_Adc16ConversionValue);
             arm_fir_q15(&filters_matrix[currentFrequency][currentFilter],&q_filterInput, &q_filterOuput, 1);
-            BufferWrite(q_filterOuput);
             DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)q_filterOuput);
         }
+        BufferWrite((q15_t)(g_Adc16ConversionValue));
         break;
   case BUFFER:
-        DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)BufferRead(0));
+        if(currentFilter == FI_NOFILTER){
+            DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)BufferRead());
+        }else{
+            q_filterInput = BufferRead();
+            arm_fir_q15(&filters_matrix[currentFrequency][currentFilter],&q_filterInput, &q_filterOuput, 1);
+            DAC_SetBufferValue(DAC0_PERIPHERAL, 0, (uint16_t)q_filterOuput());
+        }
         break;
   }
 
